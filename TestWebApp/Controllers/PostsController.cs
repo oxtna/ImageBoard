@@ -22,7 +22,9 @@ namespace TestWebApp.Controllers
         // GET: Posts
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Posts.ToListAsync());
+            var posts = await _context.Posts.ToListAsync();
+            posts.Sort(Post.CompareByDates);
+            return View(posts);
         }
 
         // GET: Posts/Create

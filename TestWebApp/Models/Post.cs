@@ -16,5 +16,10 @@ namespace TestWebApp.Models
         [StringLength(1000, MinimumLength = 1)]
         [Display(Name = "Content")]
         public string Content { get; set; }
+
+        public static int CompareByDates(Post x, Post y)
+        {
+            return x.Timestamp.CompareTo(y.Timestamp);
+        }
     }
 }
