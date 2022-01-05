@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -13,35 +15,45 @@ namespace TestWebApp.Controllers
     public class ImagesController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly IWebHostEnvironment _env;
+        private readonly string _imgDir;
 
-        public ImagesController(AppDbContext context)
+        public ImagesController(AppDbContext context, IWebHostEnvironment env)
         {
             _context = context;
+            _env = env;
+            _imgDir = "img";
         }
 
-        // GET: Images
         public async Task<IActionResult> Index()
         {
             return View(await _context.Images.ToListAsync());
         }
 
-        // GET: Images/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Images/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind] Image image)
+        public async Task<IActionResult> Create([Bind("File")] Image image)
         {
-            if (ModelState.IsValid)
+            if (image.File != null)
             {
-                _context.Add(image);
-                await _context.SaveChangesAsync();
+                // This loop should NEVER take a noticable amount of time.
+                do
+                {
+                    image.Path = Path.Combine(_imgDir, Guid.NewGuid().ToString("N")) + Path.GetExtension(image.File.FileName);
+                } while (System.IO.File.Exists(Path.Combine(_env.WebRootPath, image.Path)));
+
+                using (var filestream = new FileStream(Path.Combine(_env.WebRootPath, image.Path), FileMode.CreateNew, FileAccess.Write))
+                {
+                    await image.File.CopyToAsync(filestream);
+                    filestream.Flush();
+                    _context.Add(image);
+                    await _context.SaveChangesAsync();
+                }
                 return RedirectToAction(nameof(Index));
             }
             return View(image);
