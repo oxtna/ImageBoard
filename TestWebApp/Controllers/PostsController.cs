@@ -19,7 +19,7 @@ namespace TestWebApp.Controllers
             _context = context;
         }
 
-        // GET: Posts
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
             var posts = await _context.Posts.ToListAsync();
@@ -27,15 +27,12 @@ namespace TestWebApp.Controllers
             return View(posts);
         }
 
-        // GET: Posts/Create
+        [HttpGet]
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Posts/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Content")] Post post)

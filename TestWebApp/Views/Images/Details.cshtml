@@ -1,0 +1,10 @@
+﻿@model TestWebApp.Models.Image
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<div class="container-fluid">
+    <h1 class="text-center">Details</h1>
+    <img src="@('/' + Model.Path)" class="img-fluid pt-2" />
+</div>

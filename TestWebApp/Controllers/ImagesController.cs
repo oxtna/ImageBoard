@@ -25,11 +25,24 @@ namespace TestWebApp.Controllers
             _imgDir = "img";
         }
 
-        public async Task<IActionResult> Index()
+        [HttpGet]
+        [Route("{controller}/{name}")]
+        public async Task<IActionResult> Details(string name)
         {
-            return View(await _context.Images.ToListAsync());
+            if (string.IsNullOrEmpty(name))
+            {
+                return NotFound();
+            }
+            var img = await _context.Images.Where(x => x.Path.Contains(name)).FirstOrDefaultAsync();
+            if (img == null)
+            {
+                return NotFound();
+            }
+            return View(img);
         }
 
+        [HttpGet]
+        [Route("{controller}/Create")]
         public IActionResult Create()
         {
             return View();
